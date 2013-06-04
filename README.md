@@ -3,6 +3,10 @@ typewhenwhite
 
 a hardware keyboard over adb. do not use this if unless you know what adb is.
 
+Demo
+----
+https://plus.google.com/u/0/117798383320441374960/posts/euJQkoCoLGa
+
 How to use
 ----------
 
