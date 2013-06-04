@@ -11,7 +11,7 @@ How to use
 ```
 java -jar typewhenwhite.jar
 ```
-![typewhenwhite](http://farm8.staticflickr.com/7352/8947165269_ee39994983_b.jpg)
+![typewhenwhite](https://lh3.googleusercontent.com/-Yq71UkrQ3hI/Ua3XLW8AL8I/AAAAAAAA8A8/YEE2Ave3jwk/w554-h610-no/typewhenwhite_077.png)
 
 now you got a hardware keyboard for free
 
