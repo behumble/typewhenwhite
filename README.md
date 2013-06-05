@@ -1,7 +1,7 @@
 typewhenwhite
 =============
 
-a hardware keyboard over adb. do not use this if unless you know what adb is.
+a hardware keyboard over [adb](http://developer.android.com/tools/help/adb.html).
 
 Demo
 ----
