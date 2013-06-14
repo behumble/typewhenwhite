@@ -1032,6 +1032,7 @@ class AwtDroidExchange {
             case KeyEvent.VK_B: return KEYCODE_B;
             case KeyEvent.VK_BACK_SLASH: return KEYCODE_BACKSLASH;
             case KeyEvent.VK_BACK_SPACE: return KEYCODE_DEL;
+            case KeyEvent.VK_BACK_QUOTE: return KEYCODE_GRAVE;
             case KeyEvent.VK_C: return KEYCODE_C;
             case KeyEvent.VK_CAPS_LOCK: return KEYCODE_CAPS_LOCK;
             case KeyEvent.VK_CLEAR: return KEYCODE_CLEAR;
