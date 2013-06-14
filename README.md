@@ -18,6 +18,7 @@ java -jar typewhenwhite.jar
 ![typewhenwhite](https://lh3.googleusercontent.com/-Yq71UkrQ3hI/Ua3XLW8AL8I/AAAAAAAA8A8/YEE2Ave3jwk/w554-h610-no/typewhenwhite_077.png)
 
 now you got a hardware keyboard for free
+ - [Ganada IME for Korean](https://play.google.com/store/apps/details?id=com.bnl.GanadaIMEBeta)
 
 Resources
 ---------
