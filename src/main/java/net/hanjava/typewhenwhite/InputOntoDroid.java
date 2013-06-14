@@ -43,6 +43,7 @@ public class InputOntoDroid extends JLabel implements KeyListener, FocusListener
         setVerticalTextPosition(JLabel.TOP);
         enableInputMethods(false);
         addKeyListener(this);
+        setFocusTraversalKeysEnabled(false);
         addFocusListener(this);
         addMouseListener(this);
         setOpaque(true);
