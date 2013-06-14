@@ -1100,6 +1100,7 @@ class AwtDroidExchange {
             case KeyEvent.VK_PERIOD: return KEYCODE_PERIOD;
             case KeyEvent.VK_PLUS: return KEYCODE_PLUS;
             case KeyEvent.VK_Q: return KEYCODE_Q;
+            case KeyEvent.VK_QUOTE: return KEYCODE_APOSTROPHE;
             case KeyEvent.VK_R: return KEYCODE_R;
             case KeyEvent.VK_RIGHT: return KEYCODE_DPAD_RIGHT;
             case KeyEvent.VK_RIGHT_PARENTHESIS: return KEYCODE_NUMPAD_RIGHT_PAREN;
