@@ -18,12 +18,11 @@ package net.hanjava.typewhenwhite;
 
 import com.android.chimpchat.ChimpChat;
 import com.android.chimpchat.core.IChimpDevice;
+import com.android.ddmlib.AndroidDebugBridge;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.*;
 import java.awt.Color;
+import java.awt.Window;
 import java.awt.event.*;
 import java.io.IOException;
 import java.net.URL;
@@ -31,8 +30,10 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class InputOntoDroid extends JLabel implements KeyListener, FocusListener, MouseListener, WindowListener, AdbRunnable.Listener {
-    private IChimpDevice device;
+    IChimpDevice device;
     private Executor cmdExecutor = Executors.newSingleThreadExecutor();
+    private DeviceChooser deviceChooser;
+    ChimpChat chimp;
 
     public InputOntoDroid() {
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -47,7 +48,6 @@ public class InputOntoDroid extends JLabel implements KeyListener, FocusListener
         addFocusListener(this);
         addMouseListener(this);
         setOpaque(true);
-        updateStatusToUI();
     }
 
     @Override
@@ -57,6 +57,7 @@ public class InputOntoDroid extends JLabel implements KeyListener, FocusListener
 
     @Override
     public void keyPressed(KeyEvent keyEvent) {
+        if(device==null) return;
         System.out.println("[InputOntoDroid] "+keyEvent);
         try {
             AwtDroidExchange.handleKeyPressed(keyEvent, device.getManager());
@@ -67,6 +68,7 @@ public class InputOntoDroid extends JLabel implements KeyListener, FocusListener
 
     @Override
     public void keyReleased(KeyEvent keyEvent) {
+        if(device==null) return;
         System.out.println("[InputOntoDroid] "+keyEvent);
         try {
             AwtDroidExchange.handleKeyReleased(keyEvent, device.getManager());
@@ -112,10 +114,8 @@ public class InputOntoDroid extends JLabel implements KeyListener, FocusListener
 
     @Override
     public void windowOpened(WindowEvent windowEvent) {
-        ChimpChat chimp = ChimpChat.getInstance();
-        AdbRunnable task = new AdbRunnable(chimp, this, AdbRunnable.CMD_CONNECT);
+        showDeviceChooser();
         requestFocus();
-        cmdExecutor.execute(task);
     }
 
     @Override
@@ -167,17 +167,58 @@ public class InputOntoDroid extends JLabel implements KeyListener, FocusListener
         } else {
             setText("Connecting via adb...");
         }
+
         boolean running = connected && hasFocus();
         setBackground( running ? Color.WHITE : Color.GRAY);
     }
 
-    public static void main(String[] args) {
+    void showDeviceChooser() {
+        if(deviceChooser==null) {
+            deviceChooser = new DeviceChooser((Window) getTopLevelAncestor(), this);
+            AndroidDebugBridge.addDeviceChangeListener(deviceChooser);
+            chimp = ChimpChat.getInstance();
+            deviceChooser.pack();
+        }
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                deviceChooser.setLocationRelativeTo(InputOntoDroid.this);
+                System.out.println("[InputOntoDroid] showDeviceChooser.show ");
+                deviceChooser.setVisible(true);
+            }
+        });
+    }
+
+    void requestBackgroundTask(Runnable r) {
+        cmdExecutor.execute(r);
+    }
+
+    public JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menuDevice = new JMenu("Device");
+        JMenuItem itemShowChooser = new JMenuItem("Choose...");
+        itemShowChooser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                showDeviceChooser();
+            }
+        });
+        menuDevice.add(itemShowChooser);
+        menuBar.add(menuDevice);
+        return menuBar;
+    }
+
+    public static void main(String[] args) throws Exception {
+        UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
         JFrame frame = new JFrame("typewhenwhite");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        InputOntoDroid mainPanel = new InputOntoDroid();
-        frame.addWindowListener(mainPanel);
-        frame.setContentPane(mainPanel);
+        InputOntoDroid main = new InputOntoDroid();
+        frame.addWindowListener(main);
+        frame.setContentPane(main);
+        frame.setJMenuBar( main.createMenuBar() );
         frame.pack();
+        frame.setLocationByPlatform(true);
         frame.setVisible(true);
     }
 }

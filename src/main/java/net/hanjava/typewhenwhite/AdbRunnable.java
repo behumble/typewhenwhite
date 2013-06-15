@@ -18,6 +18,10 @@ package net.hanjava.typewhenwhite;
 
 import com.android.chimpchat.ChimpChat;
 import com.android.chimpchat.core.IChimpDevice;
+import com.android.ddmlib.AndroidDebugBridge;
+import com.android.ddmlib.IDevice;
+
+import java.util.Arrays;
 
 class AdbRunnable implements Runnable {
     static final byte CMD_CONNECT = 0;
@@ -26,23 +30,31 @@ class AdbRunnable implements Runnable {
         void adbConnected(IChimpDevice device);
         void adbDisconnected();
     }
-    private Listener listener;
-    private ChimpChat chimp;
-    byte command;
 
-    AdbRunnable(ChimpChat chimp, Listener listener, byte cmd) {
-        if(listener==null) throw new NullPointerException("listener can not be null");
-        this.chimp = chimp;
-        this.listener = listener;
+    private InputOntoDroid main;
+    byte command;
+    private Object param;
+
+    AdbRunnable(InputOntoDroid main, byte cmd, Object param) {
+        this.main = main;
         this.command = cmd;
+        this.param = param;
     }
 
     @Override
     public void run() {
         switch (command) {
             case CMD_CONNECT:
-                IChimpDevice device = chimp.waitForConnection();
-                listener.adbConnected(device);
+                String serial = param.toString();
+                System.out.println("[AdbRunnable] trying to connect to "+serial);
+                if(main.device!=null) {
+                    main.device.dispose();
+                    main.adbDisconnected();
+                }
+                ChimpChat chimp = main.chimp;
+                IChimpDevice device = chimp.waitForConnection(5000, serial);
+                System.out.println("[AdbRunnable] connected to "+serial);
+                main.adbConnected(device);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown command : "+command);
