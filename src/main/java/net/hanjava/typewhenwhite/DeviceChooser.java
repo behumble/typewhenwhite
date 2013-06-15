@@ -32,8 +32,7 @@
 
 package net.hanjava.typewhenwhite;
 
-import com.android.ddmlib.AndroidDebugBridge;
-import com.android.ddmlib.IDevice;
+import com.android.ddmlib.*;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
@@ -43,6 +42,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.Dimension;
 import java.awt.Window;
+import java.io.IOException;
+import java.util.Properties;
 
 public class DeviceChooser extends JDialog implements AndroidDebugBridge.IDeviceChangeListener, ListSelectionListener {
     private DefaultListModel deviceListModel = new DefaultListModel();
@@ -60,12 +61,24 @@ public class DeviceChooser extends JDialog implements AndroidDebugBridge.IDevice
 
     @Override
     public void deviceConnected(IDevice iDevice) {
-        deviceListModel.addElement(iDevice);
+        CollectingOutputReceiver receiver = new CollectingOutputReceiver();
+        try {
+            iDevice.executeShellCommand("getprop", receiver);
+            DeviceInfo deviceInfo = ShellUtil.createDeviceInfo(iDevice, iDevice.getSerialNumber(), receiver.getOutput());
+            deviceListModel.addElement(deviceInfo);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
     public void deviceDisconnected(IDevice iDevice) {
-        deviceListModel.removeElement(iDevice);
+        int size = deviceListModel.size();
+        for(int i=0;i<size;i++) {
+            DeviceInfo deviceInfo = (DeviceInfo) deviceListModel.get(i);
+            boolean match = deviceInfo.serial.equals(iDevice.getSerialNumber());
+            if(match) deviceListModel.removeElement(deviceInfo);
+        }
     }
 
     @Override
@@ -77,7 +90,7 @@ public class DeviceChooser extends JDialog implements AndroidDebugBridge.IDevice
     public void valueChanged(ListSelectionEvent listSelectionEvent) {
         if(listSelectionEvent.getValueIsAdjusting()) return;
         int i = ((JList)listSelectionEvent.getSource()).getSelectedIndex();
-        IDevice iDevice = (IDevice) deviceListModel.get(i);
+        IDevice iDevice = ((DeviceInfo) deviceListModel.get(i)).device;
         String sn = iDevice.getSerialNumber();
         Runnable r = new AdbRunnable(main, AdbRunnable.CMD_CONNECT, sn);
         main.requestBackgroundTask(r);
