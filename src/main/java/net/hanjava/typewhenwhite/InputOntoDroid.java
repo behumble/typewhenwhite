@@ -210,6 +210,7 @@ public class InputOntoDroid extends JLabel implements KeyListener, FocusListener
     }
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
         UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
         JFrame frame = new JFrame("typewhenwhite");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
