@@ -34,14 +34,10 @@ package net.hanjava.typewhenwhite;
 
 import com.android.ddmlib.*;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JDialog;
-import javax.swing.JList;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.awt.Dimension;
-import java.awt.Window;
+import java.awt.*;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -49,9 +45,42 @@ public class DeviceChooser extends JDialog implements AndroidDebugBridge.IDevice
     private DefaultListModel deviceListModel = new DefaultListModel();
     private InputOntoDroid main;
 
+    static class DevicePanel extends JPanel implements ListCellRenderer {
+        private JLabel labelMain;
+        private JLabel labelSub;
+        DevicePanel() {
+            setLayout( new BorderLayout() );
+            setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            labelMain = new JLabel();
+            Font plainFont = labelMain.getFont();
+            Font bigFont = plainFont.deriveFont(plainFont.getSize2D() * 1.5f);
+            labelMain.setFont(bigFont);
+            labelMain.setHorizontalAlignment(SwingConstants.CENTER);
+            add(labelMain, BorderLayout.CENTER);
+            labelSub = new JLabel();
+            labelSub.setHorizontalAlignment(SwingConstants.CENTER);
+            labelSub.setOpaque(true);
+            labelSub.setBackground(new Color(100, 100, 100, 64));
+            add(labelSub, BorderLayout.SOUTH);
+        }
+
+        @Override
+        public Component getListCellRendererComponent(JList jList, Object value, int index, boolean selected, boolean hasFocus) {
+            Color bgColor = selected ? jList.getSelectionBackground() : jList.getBackground();
+            setBackground(bgColor);
+            Color fgColor = selected ? jList.getSelectionForeground() : jList.getForeground();
+            setForeground(fgColor);
+            DeviceInfo model = (DeviceInfo) value;
+            labelMain.setText(model.serial);
+            labelSub.setText(model.brand+" "+model.model);
+            return this;
+        }
+    }
+
     DeviceChooser(Window parent, InputOntoDroid main) {
         super(parent, "Choose a device");
         JList deviceList = new JList(deviceListModel);
+        deviceList.setCellRenderer( new DevicePanel() );
         deviceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         deviceList.addListSelectionListener(this);
         deviceList.setPreferredSize(new Dimension(300, 300));
