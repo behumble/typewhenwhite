@@ -21,101 +21,38 @@ import com.android.chimpchat.core.IChimpDevice;
 import com.android.ddmlib.AndroidDebugBridge;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Window;
-import java.awt.event.*;
-import java.io.IOException;
-import java.net.URL;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class InputOntoDroid extends JLabel implements KeyListener, FocusListener, MouseListener, WindowListener, AdbRunnable.Listener {
+public class InputOntoDroid extends JPanel implements WindowListener, AdbRunnable.Listener {
     IChimpDevice device;
     private Executor cmdExecutor = Executors.newSingleThreadExecutor();
     private DeviceChooser deviceChooser;
     ChimpChat chimp;
+    private FaceLabel faceLabel;
+    private PropertyPanel propertyPanel;
 
     public InputOntoDroid() {
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        URL logoUrl = InputOntoDroid.class.getClassLoader().getResource("HP-Keyboard-icon.png");
-        setIcon(new ImageIcon(logoUrl));
-        setFont(getFont().deriveFont(20f));
-        setHorizontalTextPosition(JLabel.CENTER);
-        setVerticalTextPosition(JLabel.TOP);
-        enableInputMethods(false);
-        addKeyListener(this);
-        setFocusTraversalKeysEnabled(false);
-        addFocusListener(this);
-        addMouseListener(this);
-        setOpaque(true);
-    }
-
-    @Override
-    public void keyTyped(KeyEvent keyEvent) {
-        // nothing to do
-    }
-
-    @Override
-    public void keyPressed(KeyEvent keyEvent) {
-        if(device==null) return;
-        System.out.println("[InputOntoDroid] "+keyEvent);
-        try {
-            AwtDroidExchange.handleKeyPressed(keyEvent, device.getManager());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent keyEvent) {
-        if(device==null) return;
-        System.out.println("[InputOntoDroid] "+keyEvent);
-        try {
-            AwtDroidExchange.handleKeyReleased(keyEvent, device.getManager());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void focusGained(FocusEvent focusEvent) {
-        updateStatusToUI();
-    }
-
-    @Override
-    public void focusLost(FocusEvent focusEvent) {
-        updateStatusToUI();
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent mouseEvent) {
-        requestFocus();
-    }
-
-    @Override
-    public void mousePressed(MouseEvent mouseEvent) {
-        // do nothing
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent mouseEvent) {
-        // do nothing
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent mouseEvent) {
-        // do nothing
-    }
-
-    @Override
-    public void mouseExited(MouseEvent mouseEvent) {
-        // do nothing
+        setLayout(new BorderLayout());
+        faceLabel = new FaceLabel(this);
+        faceLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        add(BorderLayout.CENTER, faceLabel);
+        propertyPanel = new PropertyPanel(this);
+        propertyPanel.setBorder(BorderFactory.createTitledBorder("Properties"));
+        add(BorderLayout.EAST, propertyPanel);
     }
 
     @Override
     public void windowOpened(WindowEvent windowEvent) {
         showDeviceChooser();
-        requestFocus();
+        faceLabel.requestFocus();
     }
 
     @Override
@@ -151,6 +88,7 @@ public class InputOntoDroid extends JLabel implements KeyListener, FocusListener
     @Override
     public void adbConnected(IChimpDevice device) {
         this.device = device;
+        propertyPanel.extractFrom(device);
         updateStatusToUI();
     }
 
@@ -161,16 +99,7 @@ public class InputOntoDroid extends JLabel implements KeyListener, FocusListener
     }
 
     private void updateStatusToUI() {
-        boolean connected = device!=null;
-        if(connected) {
-            String model = device.getProperty("build.model");
-            setText(String.format("Connected to %s!! Type something", model));
-        } else {
-            setText("Connecting via adb...");
-        }
-
-        boolean running = connected && hasFocus();
-        setBackground( running ? Color.WHITE : Color.GRAY);
+        faceLabel.updateStatusToUI();
     }
 
     void showDeviceChooser() {
@@ -185,7 +114,6 @@ public class InputOntoDroid extends JLabel implements KeyListener, FocusListener
             @Override
             public void run() {
                 deviceChooser.setLocationRelativeTo(InputOntoDroid.this);
-                System.out.println("[InputOntoDroid] showDeviceChooser.show ");
                 deviceChooser.setVisible(true);
             }
         });
