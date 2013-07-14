@@ -163,7 +163,8 @@ public class InputOntoDroid extends JLabel implements KeyListener, FocusListener
     private void updateStatusToUI() {
         boolean connected = device!=null;
         if(connected) {
-            setText("Connected!! Type something");
+            String model = device.getProperty("build.model");
+            setText(String.format("Connected to %s!! Type something", model));
         } else {
             setText("Connecting via adb...");
         }
