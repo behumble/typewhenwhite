@@ -30,13 +30,18 @@ public class ShellUtil {
         Properties result = new Properties();
         for(int i=0;i<lines.length;i++) {
             String line = lines[i];
-            int start = 1;  // skip beginning '['
-            int end = line.indexOf(']');
-            String key = line.substring(start, end);
-            start = line.indexOf('[', end) + 1;
-            end = line.indexOf(']', start);
-            String value = line.substring(start, end);
-            result.setProperty(key, value);
+            try {
+                int start = 1;  // skip beginning '['
+                int end = line.indexOf(']');
+                String key = line.substring(start, end);
+                start = line.indexOf('[', end) + 1;
+                end = line.indexOf(']', start);
+                String value = line.substring(start, end);
+                result.setProperty(key, value);
+            } catch (StringIndexOutOfBoundsException sioobe) {
+                System.err.println("Failed to parse : "+line);
+                sioobe.printStackTrace();
+            }
         }
         return result;
     }
